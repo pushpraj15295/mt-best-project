@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const UserModel = require("../models/userModel");
 const ErrorHandler = require("../utils/erroehandler");
 
+//**************************************************************************************************** Token athorizzation middeleware  */
 exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   const { token } = req.cookies;
 
@@ -16,3 +17,15 @@ exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
     req.user = await UserModel.findById(decodedData.id);
     next()
 });
+
+//**************************************************************************************************** Role athorizzation middleware */
+exports.authorizeRoles = (...roles) => {
+   return (req, res, next)=>{
+     if(!roles.includes(req.user.role)){
+      return  next(new ErrorHandler(`Role :${req.user.role} is not allowed to access this resource` , 403))
+     }
+     
+        next()
+     
+   }
+}

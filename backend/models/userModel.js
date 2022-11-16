@@ -6,6 +6,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 //jwt token
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 //******************************************************************   User - Schema     */
 const UserSchema = new Schema({
@@ -49,7 +50,7 @@ const UserSchema = new Schema({
 //************************************************************************passord pre incrypt */
 UserSchema.pre("save", async function (next) {
   //for change password
-  if(!this.isModified("password")) {
+  if (!this.isModified("password")) {
     next();
   }
   this.password = await bcrypt.hash(this.password, 10);
@@ -62,11 +63,26 @@ UserSchema.methods.getJWTToken = function () {
   });
 };
 
-
 //*************************************************************************comparePassword */
-UserSchema.methods.comparePassword = async function(enterPassword){
-   return await bcrypt.compare(enterPassword , this.password);
-}
+UserSchema.methods.comparePassword = async function (enterPassword) {
+  return await bcrypt.compare(enterPassword, this.password);
+};
+//*************************************************************************genrate password reset Token */
+UserSchema.methods.getResetPasswordToken = async function () {
+  //genrating token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  // hashing and adding resetpassword token to userSchema;
+
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 60 * 1000;
+
+    return resetToken;
+};
+
 //******************************************************* */
 const UserModel = model("User", UserSchema);
 

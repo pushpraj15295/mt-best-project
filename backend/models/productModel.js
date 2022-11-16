@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, default: mongoose } = require("mongoose");
 
 const productSchema = new Schema({
   name: {
@@ -52,6 +52,11 @@ const productSchema = new Schema({
         }
      }
   ],
+  user :{
+    type : mongoose.Schema.ObjectId,
+    ref : "User",
+    required : true,
+  },
   createdAt : { 
      type : Date,
      default : Date.now

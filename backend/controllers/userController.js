@@ -25,7 +25,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
 
 //****************************************************************************************** Login user */
 
-exports.loginUser = catchAsyncError(async (req, res)=>{
+exports.loginUser = catchAsyncError(async (req, res,next)=>{
 
     const {email,password} = req.body;
     if(!email || !password){
@@ -49,4 +49,38 @@ exports.loginUser = catchAsyncError(async (req, res)=>{
 
      sendToken(user,200,res)
 
+})
+
+
+//*****************************************************************************************************LOG OUT user */
+
+exports.logout = catchAsyncError(async (req, res,next)=>{
+  
+   //cleare token 
+     res.cookie("token", null , { 
+       expires : new Date(Date.now()),
+       httpOnly: true
+     })
+    
+     res.status(200).json({ success: true, message : "Logged Out"  })
+
+})
+
+
+//************************************************************************************************************ forgot password */
+
+
+exports.forgotPassword = catchAsyncError(async (req, res,next)=>{
+
+      const user = await UserModel.findOne({ email : req.body.email})
+      if(!user){
+        return next(new ErrorHandler("user not found" , 404));
+      }
+      // get resetpass token
+     const resetToken =  UserModel.getResetPasswordToken();
+    
+      //saving resettoken
+     await UserModel.save({validateBeforeSave: false});
+
+     
 })

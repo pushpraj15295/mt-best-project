@@ -4,16 +4,16 @@ const ErrorHandler = require("../utils/erroehandler");
 const catchAsyncError = require("../middleware/catchAsyncError");
 const ApiFeatures = require("../utils/apifeatures");
 
-// ****************************************************************************************************************** PRODUCTS  ***/
-
-//create products -by  ADMIN
+//**************************************************************************************create products -by  ADMIN
 exports.createProduct = catchAsyncError(async(req, res, next) => {
+  
+  req.body.user = req.user.id;      //saving data for how create data for - ref
   const product = await productModule.create(req.body);
 
   res.status(200).json({ success: true, product });
 })
 
-//get All product
+//***************************************************************************************get All product
 exports.getAllProduct = catchAsyncError(async (req, res) => {
   const resultPer_page = 8;
   const productCount = await productModule.countDocuments();
@@ -30,7 +30,7 @@ exports.getAllProduct = catchAsyncError(async (req, res) => {
   });
 })
 
-// get product details OR single product by ID
+// ***************************************************************************************get product details OR single product by ID
 exports.getProductDetails = catchAsyncError(async (req, res, next) => {
   let product = await productModule.findById(req.params.id);
   if (!product) {
@@ -41,7 +41,7 @@ exports.getProductDetails = catchAsyncError(async (req, res, next) => {
   }
 })
 
-// update product - admin
+//***************************************************************************************** */ update product - admin
 exports.updateProduct = catchAsyncError(async (req, res, next) => {
   let product = await productModule.findById(req.params.id);
   if (!product) {
