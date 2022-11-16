@@ -1,13 +1,14 @@
 const ErrorHandler = require("../utils/erroehandler");
 const catchAsyncError = require("../middleware/catchAsyncError");
 
-const UserModel = require("../models/UserModel");
+const UserModel = require("../models/userModel");
 const sendToken = require("../utils/jwtToken");
 
 // *****************************************************************************************signup user and dairect login-
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
+
   const user = await UserModel.create({ name, email, password,
     avatar: {
       public_id: "this is your avatar",
@@ -16,7 +17,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   });
 
 //    const token = user.getJWTToken();
-//    res.status(201).json({ success : true, user, token })
+//    res.status(201).json({ success : true, token })
        sendToken(user,201,res)
 });
 

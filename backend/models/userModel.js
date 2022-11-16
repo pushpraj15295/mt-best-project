@@ -49,7 +49,7 @@ const UserSchema = new Schema({
 //************************************************************************passord pre incrypt */
 UserSchema.pre("save", async function (next) {
   //for change password
-  if (!this.isModified("password")) {
+  if(!this.isModified("password")) {
     next();
   }
   this.password = await bcrypt.hash(this.password, 10);
