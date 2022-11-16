@@ -68,7 +68,7 @@ UserSchema.methods.comparePassword = async function (enterPassword) {
   return await bcrypt.compare(enterPassword, this.password);
 };
 //*************************************************************************genrate password reset Token */
-UserSchema.methods.getResetPasswordToken = async function () {
+UserSchema.methods.getResetPasswordToken = function () {
   //genrating token
   const resetToken = crypto.randomBytes(20).toString("hex");
   // hashing and adding resetpassword token to userSchema;
@@ -78,7 +78,7 @@ UserSchema.methods.getResetPasswordToken = async function () {
     .update(resetToken)
     .digest("hex");
 
-    this.resetPasswordExpire = Date.now() + 15 * 60 * 60 * 1000;
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
     return resetToken;
 };
