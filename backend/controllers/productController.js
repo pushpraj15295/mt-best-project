@@ -1,7 +1,8 @@
 const productModule = require("../models/productModel");
 const ErrorHandler = require("../utils/erroehandler");
 //for try catch wright again and again using catchAsyncError
-const catchAsyncError = require("../middleware/catchAsyncError")
+const catchAsyncError = require("../middleware/catchAsyncError");
+const ApiFeatures = require("../utils/apifeatures");
 
 // ****************************************************************************************************************** PRODUCTS  ***/
 
@@ -14,10 +15,18 @@ exports.createProduct = catchAsyncError(async(req, res, next) => {
 
 //get All product
 exports.getAllProduct = catchAsyncError(async (req, res) => {
-  const products = await productModule.find();
+  const resultPer_page = 8;
+  const productCount = await productModule.countDocuments();
+  //filter search functonality
+ const apiFeature = new ApiFeatures(productModule.find(),req.query).search().filter().pagination(resultPer_page)
+
+  //get all products
+  // const products = await productModule.find();
+  const products = await apiFeature.query;
   res.status(200).json({
     success: true,
     products,
+    productCount
   });
 })
 
