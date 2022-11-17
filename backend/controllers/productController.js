@@ -56,7 +56,7 @@ exports.updateProduct = catchAsyncError(async (req, res, next) => {
   }
 })
 
-//delete product - by Admin
+//***************************************************************************************************delete product - by Admin
 exports.deleteProduct = catchAsyncError(async (req, res, next) => {
   let product = await productModule.findById(req.params.id);
   if (!product) {
@@ -69,3 +69,6 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
       .json({ success: true, message: "Product removed successfully" });
   }
 })
+
+
+//***********************************************************************************************Create New Review or Update the review */
