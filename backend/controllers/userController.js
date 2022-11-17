@@ -39,7 +39,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
 
-  const isPasswordMatched = user.comparePassword(password);
+  const isPasswordMatched = await user.comparePassword(password);
 
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid email or password", 401));
@@ -103,35 +103,69 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
   }
 });
 
-
-
 // ******************************************************************************************** reset passwood /
 
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
   // creating token hash
-     const resetPasswordToken = crypto
-     .createHash("sha256")
-     .update(req.params.token)
-     .digest("hex");
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
 
-     const user = await UserModel.findOne({
-       resetPasswordToken,
-       resetPasswordExpire:{ $gt : Date.now() }
-     })
+  const user = await UserModel.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
 
-     if (!user) {
-      return next(new ErrorHandler("reset password token is Invalid or has been expired", 404));
-    }
-    if(req.body.password !== req.body.confirmPassword) {
-       return next(new ErrorHandler("pasword does not exit" ,400));
-    }
+  if (!user) {
+    return next(
+      new ErrorHandler(
+        "reset password token is Invalid or has been expired",
+        404
+      )
+    );
+  }
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("pasword does not exit", 400));
+  }
 
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
 
-    await user.save();
+  await user.save();
 
-    // for login again after change password
-    sendToken(user , 200 , res);
-})
+  // for login again after change password
+  sendToken(user, 200, res);
+});
+
+//**************************************************************************************************get user details -him/her self */
+exports.getUserDetails = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+//**************************************************************************************************update user  Password  */
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  const user = await UserModel.findById(req.user.id).select("+password");
+  
+  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+  //math pass
+  if(!isPasswordMatched) {
+     return next(new ErrorHandler("Old password is Incorrect", 400))
+  }
+  // match new pass and confirm pass
+  if(req.body.newPassword != req.body.confirmPassword) {
+        return next(new ErrorHandler("password mismatch", 400))
+  }
+  //update password and save in database
+  user.password = req.body.newPassword;
+  await user.save();
+
+  //providing token
+  sendToken(user,200, res);
+});

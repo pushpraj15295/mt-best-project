@@ -15,17 +15,17 @@ exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = await UserModel.findById(decodedData.id);
-    next()
+    next();
 });
 
 //**************************************************************************************************** Role athorizzation middleware */
 exports.authorizeRoles = (...roles) => {
    return (req, res, next)=>{
      if(!roles.includes(req.user.role)){
-      return  next(new ErrorHandler(`Role :${req.user.role} is not allowed to access this resource` , 403))
+      return  next(new ErrorHandler(`Role :${req.user.role} is not allowed to access this resource` , 403));
      }
      
-        next()
+        next();
      
    }
 }
