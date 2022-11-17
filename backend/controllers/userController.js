@@ -152,20 +152,69 @@ exports.getUserDetails = catchAsyncError(async (req, res, next) => {
 //**************************************************************************************************update user  Password  */
 exports.updatePassword = catchAsyncError(async (req, res, next) => {
   const user = await UserModel.findById(req.user.id).select("+password");
-  
+
   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
   //math pass
-  if(!isPasswordMatched) {
-     return next(new ErrorHandler("Old password is Incorrect", 400))
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old password is Incorrect", 400));
   }
   // match new pass and confirm pass
-  if(req.body.newPassword != req.body.confirmPassword) {
-        return next(new ErrorHandler("password mismatch", 400))
+  if (req.body.newPassword != req.body.confirmPassword) {
+    return next(new ErrorHandler("password mismatch", 400));
   }
   //update password and save in database
   user.password = req.body.newPassword;
   await user.save();
 
   //providing token
-  sendToken(user,200, res);
+  sendToken(user, 200, res);
 });
+
+//**************************************************************************************************update user details or Profile */
+exports.updateProfile = catchAsyncError(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    //image after some time %%%%%%%%%% add cloudinary later
+  };
+
+  const user = await UserModel.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+
+
+//**************************************************************************************************** get all user by ADMIN  /
+
+exports.getAllUser = catchAsyncError(async (req, res, next) => {
+
+    const users = await UserModel.find();
+
+    res.status(200).json({
+      success: true,
+      users,
+    })
+})
+
+//*****************************************************************************************************get specific user details by ADMIN */
+
+exports.getSingleUser = catchAsyncError(async (req, res, next) => {
+
+  const user = await UserModel.findById(req.params.id);
+  
+  if(!user){
+    return next(new ErrorHandler(`user does not exist with Id : ${req.params.id}`,400));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  })
+})
